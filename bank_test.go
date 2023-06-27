@@ -10,6 +10,7 @@ func TestNewAccount(t *testing.T) {
 	type args struct {
 		s string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -19,8 +20,10 @@ func TestNewAccount(t *testing.T) {
 		{"Pike", args{"Pike"}, &Account{Name: "Pike", Bal: 0, Hist: nil}},
 		{"Thompson", args{"Thompson"}, &Account{Name: "Thompson", Bal: 0, Hist: nil}},
 	}
+
 	accounts = map[string]*Account{}
-	for i, tt := range tests {
+	
+  for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Ensure that the correct account is created
 			if got := NewAccount(tt.args.s); !reflect.DeepEqual(got, tt.want) {
@@ -48,6 +51,7 @@ func TestName(t *testing.T) {
 	}{
 		{"Pike", args{pike}, "Pike"},
 	}
+  
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Name(tt.args.a); got != tt.want {
@@ -61,6 +65,7 @@ func TestBalance(t *testing.T) {
 	type args struct {
 		a *Account
 	}
+  
 	pike := &Account{"Pike", 100, nil}
 
 	tests := []struct {
@@ -70,6 +75,7 @@ func TestBalance(t *testing.T) {
 	}{
 		{"Pike 100", args{pike}, 100},
 	}
+  
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Balance(tt.args.a); got != tt.want {
@@ -102,6 +108,7 @@ func TestDeposit(t *testing.T) {
 		{"Thompson deposits 60", args{thompson, 60}, 60, []history{{60, 60}}, false},
 		{"Thompson deposits 99", args{thompson, 39}, 99, []history{{60, 60}, {39, 99}}, false},
 	}
+  
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Deposit(tt.args.a, tt.args.m)
@@ -137,6 +144,7 @@ func TestWithdraw(t *testing.T) {
 		{"Pike withdraws -1", args{pike, -1}, 58, true},
 		{"Thompson withdraws 60", args{thompson, 101}, 100, true},
 	}
+  
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := Withdraw(tt.args.a, tt.args.m)
@@ -157,6 +165,7 @@ func TestTransfer(t *testing.T) {
 		b *Account
 		m int
 	}
+  
 	griesemer := &Account{"Griesemer", 100, nil}
 	pike := &Account{"Pike", 100, nil}
 	thompson := &Account{"Thompson", 100, nil}
@@ -213,6 +222,7 @@ func TestHistory(t *testing.T) {
 	}{
 		{"Pike's account history", args{pike}, []int{100, 10, -40, 23}, []int{100, 110, 70, 93}, []bool{true, true, true, false}},
 	}
+  
 	for _, tt := range tests {
 		h := History(&pike)
 		t.Run(tt.name, func(t *testing.T) {

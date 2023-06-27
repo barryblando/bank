@@ -6,11 +6,10 @@ import (
 	"os"
 )
 
-// Account is a bank account with a name, a balance, and a
-// transaction history.
+// Account is a bank account with a name, a balance, and atransaction history.
 // The fields should be unexported and accessed via Name(), Balance(),
-// and History() only. However, `gob` enconding and
-// decoding (used by Save and Load) requires struct fields to be exported.
+// and History() only. However, `gob` encoding and decoding (used by Save and Load)
+// requires struct fields to be exported.
 
 type Account struct {
 	Name string
@@ -30,8 +29,10 @@ func NewAccount(s string) *Account {
 	if accounts == nil {
 		accounts = make(map[string]*Account)
 	}
+  
 	a := &Account{Name: s}
 	accounts[s] = a
+  
 	return a
 }
 
@@ -39,9 +40,11 @@ func NewAccount(s string) *Account {
 // GetAccount panics if the bank has no accounts.
 func GetAccount(name string) (*Account, error) {
 	accnt, ok := accounts[name]
+  
 	if !ok {
 		return nil, fmt.Errorf("account '%s' does not exist", name)
 	}
+  
 	return accnt, nil
 }
 
@@ -49,6 +52,7 @@ func GetAccount(name string) (*Account, error) {
 // each account and its current balance.
 func ListAccounts() string {
 	list := "Accounts:\n"
+  
 	for _, v := range accounts {
 		list += fmt.Sprintf("Account: %s, balance: %d\n", v.Name, v.Bal)
 	}
@@ -71,8 +75,10 @@ func Deposit(a *Account, m int) (int, error) {
 	if m < 0 {
 		return a.Bal, fmt.Errorf("Deposit: amount must be positive, but is %d.", m)
 	}
+  
 	a.Bal += m
 	a.Hist = append(a.Hist, history{m, a.Bal})
+  
 	return a.Bal, nil
 }
 
@@ -82,11 +88,14 @@ func Withdraw(a *Account, m int) (int, error) {
 	if m < 0 {
 		return a.Bal, fmt.Errorf("Withdraw: amount must be positive, but is %d.", m)
 	}
+  
 	if m > a.Bal {
 		return a.Bal, fmt.Errorf("Withdraw: amount (%d) must be less than actual balance (%d).", m, a.Bal)
 	}
+  
 	a.Bal -= m
 	a.Hist = append(a.Hist, history{-m, a.Bal})
+  
 	return a.Bal, nil
 }
 
@@ -101,10 +110,12 @@ func Transfer(a, b *Account, m int) (int, int, error) {
 	case m > a.Bal:
 		return 0, a.Bal, fmt.Errorf("Withdraw: amount (%d) must be less than actual balance of sending account (%d).", m, a.Bal)
 	}
+  
 	a.Bal -= m
 	b.Bal += m
 	a.Hist = append(a.Hist, history{-m, a.Bal})
 	b.Hist = append(b.Hist, history{m, b.Bal})
+  
 	return a.Bal, b.Bal, nil
 }
 
@@ -117,15 +128,19 @@ func Transfer(a, b *Account, m int) (int, int, error) {
 func History(a *Account) func() (amt, bal int, more bool) {
 	i := 0
 	more := true
+  
 	return func() (int, int, bool) {
 		if len(a.Hist) == 0 {
 			return 0, 0, false
 		}
+    
 		if i >= len(a.Hist)-1 {
 			more = false
 		}
+    
 		h := a.Hist[i]
 		i++
+    
 		return h.Amt, h.Bal, more
 	}
 }
@@ -133,46 +148,58 @@ func History(a *Account) func() (amt, bal int, more bool) {
 // Save stores the accounts map on disk.
 func Save() (err error) {
 	f, err := os.OpenFile("bank.data", os.O_WRONLY, 0666) // Note: octal #
+  
 	if err != nil {
 		f, err = os.Create("bank.data")
 		if err != nil {
 			return fmt.Errorf("Save: Create failed: %w", err)
 		}
 	}
+  
 	defer func() {
 		e := f.Close()
+    
 		if e != nil {
 			if err == nil {
 				err = e
 				return
 			}
+      
 			err = fmt.Errorf("%s: %w", e.Error(), err)
 		}
 	}()
 
 	e := gob.NewEncoder(f)
 	err = e.Encode(accounts)
+  
 	if err != nil {
 		return fmt.Errorf("Save: Encode failed: %w", err)
 	}
+  
 	return nil
 }
 
 // Load restores the accounts map from disk.
 func Load() error {
 	f, err := os.Open("bank.data")
+  
 	if err != nil {
 		if os.IsNotExist(err) {
 			// Expected. The file does not exist initially.
 			return nil
 		}
+    
 		return fmt.Errorf("Load: Open failed: %w", err)
 	}
+  
 	defer f.Close() // closing a readonly file needs no error checking
+  
 	d := gob.NewDecoder(f)
 	err = d.Decode(&accounts)
+  
 	if err != nil {
 		return fmt.Errorf("Load: Decode failed: %w", err)
 	}
+  
 	return nil
 }
